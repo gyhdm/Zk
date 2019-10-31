@@ -82,6 +82,7 @@ public class JwtTokenUtil {
         try {
             claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("JWT格式验证失败:{}", token);
         }
         return claims;

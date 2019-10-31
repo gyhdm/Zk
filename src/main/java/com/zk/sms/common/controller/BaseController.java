@@ -5,6 +5,8 @@ import com.zk.sms.common.model.ResultBody;
 import com.zk.sms.common.service.BaseService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +25,9 @@ import java.util.List;
  * @author guoying
  * @since 2019 -10-27 22:39:09
  */
-@Slf4j
-public class BaseController<T extends BaseModel, ID, S extends BaseService<T, ID>> {
-
+//@Slf4j
+public abstract class BaseController<T extends BaseModel, ID, S extends BaseService<T, ID>> {
+    private Logger log = LoggerFactory.getLogger(getClass());
     /**
      * The Service.
      */
@@ -130,9 +132,10 @@ public class BaseController<T extends BaseModel, ID, S extends BaseService<T, ID
         ResultBody resultBody = null;
         try {
             service.deleteById(id);
+            resultBody = ResultBody.success("删除成功");
         } catch (Exception e) {
             log.error("根据主键删除实体发生错误: {}", id, e);
-            resultBody = ResultBody.failure(e.getMessage(), e);
+            resultBody = ResultBody.failure(e.getMessage(), null);
         }
         return resultBody;
     }

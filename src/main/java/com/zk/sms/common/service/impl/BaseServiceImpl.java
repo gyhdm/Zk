@@ -126,8 +126,8 @@ public class BaseServiceImpl<T extends BaseModel, ID, R extends JpaRepository<T,
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteById(ID id) {
-        if (id == null) {
-            throw new JpaCrudException("delete parameter id is null.");
+        if (id == null || !repository.existsById(id)) {
+            throw new JpaCrudException("Unable to delete data whose ID does not exist");
         }
         log.info("deleteById: {}", id);
         repository.deleteById(id);

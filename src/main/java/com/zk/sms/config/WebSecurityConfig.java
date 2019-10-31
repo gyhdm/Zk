@@ -1,14 +1,14 @@
 package com.zk.sms.config;
 
-import com.zk.sms.common.filter.JwtAuthenticationTokenFilter;
-import com.zk.sms.common.filter.RestfulAccessDeniedHandler;
-import com.zk.sms.common.filter.RestfulAuthenticationEntryPoint;
+import com.zk.sms.common.filter.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +18,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -32,15 +34,27 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    /**
+     * The User details service.
+     */
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * The Jwt authentication token filter.
+     */
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
+    /**
+     * The Restful access denied handler.
+     */
     @Autowired
     private RestfulAccessDeniedHandler restfulAccessDeniedHandler;
 
+    /**
+     * The Restful authentication entry point.
+     */
     @Autowired
     private RestfulAuthenticationEntryPoint restfulAuthenticationEntryPoint;
 
@@ -65,6 +79,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Filter invocation security metadata source filter invocation security metadata source.
+     *
+     * @return the filter invocation security metadata source
+     * @author guoying
+     * @since 2019 /10/31
+     */
+    @Bean
+    public FilterInvocationSecurityMetadataSource filterInvocationSecurityMetadataSource() {
+        return new CustomFilterInvocationSecurityMetadataSource();
+    }
+
+    /**
+     * Access decision manager access decision manager.
+     *
+     * @return the access decision manager
+     * @author guoying
+     * @since 2019 /10/31
+     */
+    @Bean
+    public AccessDecisionManager accessDecisionManager() {
+        return new CustomAccessDecisionManager();
     }
 
     /**
@@ -98,6 +136,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/webjars/**",
                         "/swagger-resources/configuration/ui",
                         "/swagge‌​r-ui.html").permitAll()
+                .withObjectPostProcessor(new CustomObjectPostProcessor())
                 //除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
         // 添加JWT filter
@@ -108,5 +147,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.exceptionHandling()
                 .accessDeniedHandler(restfulAccessDeniedHandler)
                 .authenticationEntryPoint(restfulAuthenticationEntryPoint);
+    }
+
+    /**
+     * 自定义权限验证.
+     *
+     * @author guoying
+     * @since 2019 -10-31 21:51:07
+     */
+    private class CustomObjectPostProcessor implements ObjectPostProcessor<FilterSecurityInterceptor> {
+        @Override
+        public <O extends FilterSecurityInterceptor> O postProcess(O fsi) {
+            fsi.setSecurityMetadataSource(filterInvocationSecurityMetadataSource());
+            fsi.setAccessDecisionManager(accessDecisionManager());
+            return fsi;
+        }
     }
 }

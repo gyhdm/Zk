@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2019 -10-30 15:42:36
  */
 @Slf4j
-@Api(value = "权限接口")
+@Api(tags = "权限接口")
 @RestController
 public class OAuth2Controller {
 
@@ -36,7 +36,7 @@ public class OAuth2Controller {
      * @author guoying
      * @since 2019 /10/30
      */
-    @ApiOperation(value = "登录", notes = "用户名，密码登录格式:{\"username\": \"admin\",    \"password\": \"admin\"}")
+    @ApiOperation(value = "登录", notes = "用户名，密码登录.格式:{\"username\": \"admin\",    \"password\": \"admin\"}")
     @PostMapping(value = "auth/login")
     public ResultBody<String> login(@RequestBody LoginUser loginUser) {
         String token = userService.login(loginUser.getUsername(),loginUser.getPassword());

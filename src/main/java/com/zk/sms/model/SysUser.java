@@ -1,5 +1,6 @@
 package com.zk.sms.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zk.sms.common.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,6 +43,7 @@ public class SysUser extends BaseModel {
     /**
      * 密码
      */
+    @JsonIgnore
     private String password;
 
     /**
@@ -138,6 +140,7 @@ public class SysUser extends BaseModel {
      */
     private Boolean available = Boolean.TRUE;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "SysUserRole", joinColumns = {@JoinColumn(name = "userId")}, inverseJoinColumns = {@JoinColumn(name = "roleId")})
     private List<SysRole> roleList;

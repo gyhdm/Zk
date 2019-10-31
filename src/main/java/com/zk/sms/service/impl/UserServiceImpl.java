@@ -54,7 +54,7 @@ public class UserServiceImpl extends BaseServiceImpl<SysUser,String, UserReposit
         String token = jwtTokenUtil.generateToken(userDetails);
         log.info("login user details:{}",userDetails);
         redisService.hashOperations().put(jwtTokenUtil.getTokenHeader(), username, userDetails);
-        redisService.setExpireTime(jwtTokenUtil.getTokenHeader(),jwtTokenUtil.getExpiration(), TimeUnit.SECONDS);
+        redisService.setExpireTime(jwtTokenUtil.getTokenHeader(),jwtTokenUtil.getExpiration(), TimeUnit.MILLISECONDS);
         return token;
     }
 }
